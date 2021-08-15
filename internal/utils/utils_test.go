@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"github.com/stretchr/testify/require"
+	"ova-conversation-api/internal/domain"
 	"reflect"
 	"testing"
 )
@@ -66,5 +68,53 @@ func TestFilterSlice(t *testing.T) {
 		if !reflect.DeepEqual(value.result, actual) {
 			t.Errorf("Expected: %v, actual: %v", value.result, actual)
 		}
+	}
+}
+
+func TestMakeSliceOfSlicesConversation(t *testing.T) {
+	c1 := domain.NewConversation(1, 1, "c1")
+	c2 := domain.NewConversation(2, 2, "c2")
+	c3 := domain.NewConversation(3, 3, "c3")
+	c4 := domain.NewConversation(4, 4, "c4")
+	c5 := domain.NewConversation(5, 5, "c5")
+	c6 := domain.NewConversation(6, 6, "c5")
+
+	type testType struct {
+		source []domain.Conversation
+		num    int
+		result [][]domain.Conversation
+	}
+
+	var tests = []testType{
+		{[]domain.Conversation{*c1, *c2, *c3, *c4, *c5, *c6}, 4, [][]domain.Conversation{{*c1, *c2, *c3, *c4}, {*c5, *c6}}},
+		{[]domain.Conversation{*c1, *c2, *c3, *c4, *c5, *c6}, 2, [][]domain.Conversation{{*c1, *c2}, {*c3, *c4}, {*c5, *c6}}},
+		{[]domain.Conversation{*c1, *c2, *c3, *c4, *c5, *c6}, 6, [][]domain.Conversation{{*c1, *c2, *c3, *c4, *c5, *c6}}},
+		{[]domain.Conversation{*c1, *c2, *c3, *c4, *c5, *c6}, 100, [][]domain.Conversation{{*c1, *c2, *c3, *c4, *c5, *c6}}},
+	}
+
+	for _, value := range tests {
+		actual, _ := MakeSliceOfSlicesConversation(value.source, value.num)
+		require.Equal(t, value.result, actual)
+	}
+}
+
+func TestMakeSliceToMapConversation(t *testing.T) {
+	c1 := domain.NewConversation(1, 1, "c1")
+	c2 := domain.NewConversation(2, 2, "c2")
+	c3 := domain.NewConversation(3, 3, "c3")
+
+	type testType struct {
+		source []domain.Conversation
+		result map[uint64]domain.Conversation
+	}
+
+	var tests = []testType{
+		{[]domain.Conversation{*c1, *c2, *c3}, map[uint64]domain.Conversation{1: *c1, 2: *c2, 3: *c3}},
+		{[]domain.Conversation{*c1, *c2, *c2}, nil},
+	}
+
+	for _, value := range tests {
+		actual, _ := MakeSliceToMapConversation(value.source)
+		require.Equal(t, value.result, actual)
 	}
 }

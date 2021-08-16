@@ -1,8 +1,11 @@
 package utils
 
 import (
+	"github.com/stretchr/testify/require"
+	"ova-conversation-api/internal/domain"
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestMakeSliceOfSlices(t *testing.T) {
@@ -66,5 +69,53 @@ func TestFilterSlice(t *testing.T) {
 		if !reflect.DeepEqual(value.result, actual) {
 			t.Errorf("Expected: %v, actual: %v", value.result, actual)
 		}
+	}
+}
+
+func TestMakeSliceOfSlicesConversation(t *testing.T) {
+	c1 := domain.Conversation{ID: 1, UserID: 1, Text: "c1", Date: time.Now()}
+	c2 := domain.Conversation{ID: 2, UserID: 2, Text: "c2", Date: time.Now()}
+	c3 := domain.Conversation{ID: 3, UserID: 3, Text: "c3", Date: time.Now()}
+	c4 := domain.Conversation{ID: 4, UserID: 4, Text: "c4", Date: time.Now()}
+	c5 := domain.Conversation{ID: 5, UserID: 5, Text: "c5", Date: time.Now()}
+	c6 := domain.Conversation{ID: 6, UserID: 6, Text: "c6", Date: time.Now()}
+
+	type testType struct {
+		source []domain.Conversation
+		num    int
+		result [][]domain.Conversation
+	}
+
+	var tests = []testType{
+		{[]domain.Conversation{c1, c2, c3, c4, c5, c6}, 4, [][]domain.Conversation{{c1, c2, c3, c4}, {c5, c6}}},
+		{[]domain.Conversation{c1, c2, c3, c4, c5, c6}, 2, [][]domain.Conversation{{c1, c2}, {c3, c4}, {c5, c6}}},
+		{[]domain.Conversation{c1, c2, c3, c4, c5, c6}, 6, [][]domain.Conversation{{c1, c2, c3, c4, c5, c6}}},
+		{[]domain.Conversation{c1, c2, c3, c4, c5, c6}, 100, [][]domain.Conversation{{c1, c2, c3, c4, c5, c6}}},
+	}
+
+	for _, value := range tests {
+		actual, _ := MakeSliceOfSlicesConversation(value.source, value.num)
+		require.Equal(t, value.result, actual)
+	}
+}
+
+func TestMakeSliceToMapConversation(t *testing.T) {
+	c1 := domain.Conversation{ID: 1, UserID: 1, Text: "c1", Date: time.Now()}
+	c2 := domain.Conversation{ID: 2, UserID: 2, Text: "c2", Date: time.Now()}
+	c3 := domain.Conversation{ID: 3, UserID: 3, Text: "c3", Date: time.Now()}
+
+	type testType struct {
+		source []domain.Conversation
+		result map[uint64]domain.Conversation
+	}
+
+	var tests = []testType{
+		{[]domain.Conversation{c1, c2, c3}, map[uint64]domain.Conversation{1: c1, 2: c2, 3: c3}},
+		{[]domain.Conversation{c1, c2, c2}, nil},
+	}
+
+	for _, value := range tests {
+		actual, _ := MakeSliceToMapConversation(value.source)
+		require.Equal(t, value.result, actual)
 	}
 }

@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+const numOfAttempts = 5
+
 func Update(path string, duration int64) error {
 	update := func(path string) error {
 		f, err := os.Open(path)
@@ -27,11 +29,13 @@ func Update(path string, duration int64) error {
 		return closeErr
 	}
 
-	for {
+	for i := 0; i < numOfAttempts; i++ {
 		err := update(path)
 		if err != nil {
 			return err
 		}
 		time.Sleep(time.Duration(duration) * time.Second)
 	}
+
+	return nil
 }

@@ -2,12 +2,14 @@ package flusher
 
 import (
 	"errors"
+	"time"
+
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"ova-conversation-api/internal/domain"
 	"ova-conversation-api/internal/repo"
-	"time"
 )
 
 var _ = Describe("Flusher", func() {

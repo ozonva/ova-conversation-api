@@ -1,11 +1,13 @@
 package utils
 
 import (
-	"github.com/stretchr/testify/require"
-	"ova-conversation-api/internal/domain"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
+
+	"ova-conversation-api/internal/domain"
 )
 
 func TestMakeSliceOfSlices(t *testing.T) {

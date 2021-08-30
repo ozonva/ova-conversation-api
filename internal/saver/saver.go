@@ -2,14 +2,14 @@ package saver
 
 import (
 	"log"
-	"ova-conversation-api/internal/domain"
-	"ova-conversation-api/internal/flusher"
 	"sync"
 	"time"
+
+	"ova-conversation-api/internal/domain"
+	"ova-conversation-api/internal/flusher"
 )
 
 type Saver interface {
-	Init()
 	Save(entity domain.Conversation)
 	Close()
 }
@@ -24,24 +24,22 @@ type saver struct {
 }
 
 func NewSaver(duration uint, capacity uint, flusher flusher.Flusher) Saver {
-	return &saver{
+	s := &saver{
 		duration: duration,
 		capacity: capacity,
 		flusher:  flusher,
 		data:     make([]domain.Conversation, 0, capacity),
 	}
+	s.init()
+
+	return s
 }
 
-func (s *saver) Init() {
+func (s *saver) init() {
 	ticker := time.NewTicker(time.Duration(s.duration) * time.Millisecond)
 	s.chanTicker = make(chan struct{})
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-
 	go func() {
-		defer wg.Done()
-
 		for {
 			select {
 			case _, ok := <-s.chanTicker:
@@ -55,15 +53,13 @@ func (s *saver) Init() {
 			}
 		}
 	}()
-
-	wg.Wait()
 }
 
 func (s *saver) Save(entity domain.Conversation) {
 	s.mux.Lock()
 	defer s.mux.Unlock()
 
-	if (cap(s.data) == 0) || (len(s.data) == cap(s.data)-1) {
+	if (s.capacity == 0) || (len(s.data) == int(s.capacity)-1) {
 		s.data = append(s.data, entity)
 		s.flush()
 	}

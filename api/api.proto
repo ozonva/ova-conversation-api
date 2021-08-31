@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package ova.conversation.api;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/ozonva/ova-conversation-api/pkg/api";
+
+service ConversationApi {
+  rpc CreateConversationV1(CreateConversationV1Request) returns (CreateConversationV1Response) {}
+  rpc DescribeConversationV1(DescribeConversationV1Request) returns (DescribeConversationV1Response) {}
+  rpc ListConversationsV1(ListConversationsV1Request) returns (ListConversationsV1Response) {}
+  rpc RemoveConversationV1(RemoveConversationV1Request) returns (RemoveConversationV1Response) {}
+}
+
+message CreateConversationV1Request {
+  uint64 user_id = 1;
+  string text = 2;
+}
+
+message CreateConversationV1Response {
+  uint64 id = 1;
+}
+
+message DescribeConversationV1Request {
+  uint64 id = 1;
+}
+
+message DescribeConversationV1Response {
+  uint64 id = 1;
+  uint64 user_id = 2;
+  string text = 3;
+  google.protobuf.Timestamp date = 4;
+}
+
+message ListConversationsV1Request {
+  uint64 limit = 1;
+}
+
+message ListConversationsV1Response {
+  repeated DescribeConversationV1Response conversations = 1;
+}
+
+message RemoveConversationV1Request {
+  uint64 id = 1;
+}
+
+message RemoveConversationV1Response {
+  uint64 id = 1;
+}

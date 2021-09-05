@@ -2,6 +2,7 @@ package utils
 
 import (
 	"errors"
+
 	"ova-conversation-api/internal/domain"
 )
 

@@ -2,9 +2,10 @@ package domain
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestConversation_String(t *testing.T) {

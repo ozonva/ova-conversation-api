@@ -14,7 +14,7 @@ import (
 	conversationApi "ova-conversation-api/pkg/api/github.com/ozonva/ova-conversation-api/pkg/api"
 )
 
-func (s *apiServer) CreateConversationV1(ctx context.Context, req *conversationApi.CreateConversationV1Request) (*emptypb.Empty, error) {
+func (s *apiServer) UpdateConversationV1(ctx context.Context, req *conversationApi.UpdateConversationV1Request) (*emptypb.Empty, error) {
 	nameHandler := "CreateConversationV1"
 
 	tracer := opentracing.GlobalTracer()
@@ -24,27 +24,30 @@ func (s *apiServer) CreateConversationV1(ctx context.Context, req *conversationA
 
 	log.Info().Msg(nameHandler)
 	if req == nil {
-		log.Info().Msg("CreateConversationV1Request is null")
-		return nil, status.Error(codes.InvalidArgument, "CreateConversationV1Request is null")
+		log.Info().Msg("UpdateConversationV1Request is null")
+		return nil, status.Error(codes.InvalidArgument, "UpdateConversationV1Request is null")
 	}
 	log.Info().Msgf("request: %s", req.String())
 
-	err := checkValidateError("create conversation", req.Validate())
+	err := checkValidateError("update conversation", req.Validate())
 	if err != nil {
 		return nil, err
 	}
 
-	id, err := s.repo.AddEntity(domain.Conversation{
-		UserID: req.GetUserId(),
-		Text:   req.GetText(),
+	id, err := s.repo.UpdateEntity(domain.Conversation{
+		ID:   req.GetId(),
+		Text: req.GetText(),
 	})
 	if err != nil {
-		log.Error().Msgf("repo: create conversation: %s", err)
+		log.Error().Msgf("repo: update conversation: %s", err)
 		return nil, status.Error(codes.Internal, "internal error")
+	}
+	if id == 0 {
+		return nil, status.Error(codes.NotFound, "not found")
 	}
 
 	msg := kafka.Message{
-		Type: kafka.Create,
+		Type: kafka.Update,
 		Body: map[string]interface{}{
 			"id": id,
 		},
@@ -55,7 +58,7 @@ func (s *apiServer) CreateConversationV1(ctx context.Context, req *conversationA
 		return nil, err
 	}
 
-	promCreateCntr.Inc()
+	promUpdateCntr.Inc()
 
 	return &emptypb.Empty{}, nil
 }

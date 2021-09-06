@@ -1,0 +1,57 @@
+version: '3.1'
+
+services:
+  db:
+    container_name: db
+    image: postgres
+    restart: always
+    volumes:
+      - /home/hudmot/psqldataTst:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
+  jaegert:
+    container_name: ova.jaegert
+    image: jaegertracing/all-in-one:latest
+    restart: always
+    ports:
+      - "16686:16686"
+      - "6831:6831/udp"
+
+  zookeeper:
+    container_name: ova.zookeeper
+    image: bitnami/zookeeper:latest
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: 1
+    ports:
+      - "2181:2181"
+    volumes:
+      - /home/hudmot/zookeeperTst:/var/lib/zookeeperTst/data
+
+  kafka:
+    container_name: ova.kafka
+    image: bitnami/kafka:latest
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENERS: PLAINTEXT://:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      ALLOW_PLAINTEXT_LISTENER: 1
+    ports:
+      - "9092:9092"
+    volumes:
+      - /home/hudmot/kafkaTst:/var/lib/kafkaTst/data
+    depends_on:
+      - zookeeper

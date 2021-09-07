@@ -15,7 +15,7 @@ import (
 )
 
 func (s *apiServer) UpdateConversationV1(ctx context.Context, req *conversationApi.UpdateConversationV1Request) (*emptypb.Empty, error) {
-	nameHandler := "CreateConversationV1"
+	nameHandler := "UpdateConversationV1"
 
 	tracer := opentracing.GlobalTracer()
 	span := tracer.StartSpan(nameHandler)

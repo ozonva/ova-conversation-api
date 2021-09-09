@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/opentracing/opentracing-go"
 	"github.com/rs/zerolog/log"
@@ -36,7 +37,8 @@ func (s *apiServer) DescribeConversationV1(ctx context.Context, req *conversatio
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 	if entity == nil {
-		return nil, status.Error(codes.NotFound, "not found")
+		errorMsg := fmt.Sprintf("conversation with id %d not found", req.GetId())
+		return nil, status.Error(codes.NotFound, errorMsg)
 	}
 
 	return entityToResponse(entity), nil

@@ -15,10 +15,9 @@ import (
 )
 
 func (s *apiServer) UpdateConversationV1(ctx context.Context, req *conversationApi.UpdateConversationV1Request) (*emptypb.Empty, error) {
-	nameHandler := "UpdateConversationV1"
+	const nameHandler = "UpdateConversationV1"
 
-	tracer := opentracing.GlobalTracer()
-	span := tracer.StartSpan(nameHandler)
+	span, ctx := opentracing.StartSpanFromContext(ctx, nameHandler)
 
 	defer span.Finish()
 
@@ -39,7 +38,7 @@ func (s *apiServer) UpdateConversationV1(ctx context.Context, req *conversationA
 		Text: req.GetText(),
 	})
 	if err != nil {
-		log.Error().Msgf("repo: update conversation: %s", err)
+		log.Error().Err(err).Msg("update conversation")
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 	if id == 0 {

@@ -14,10 +14,9 @@ import (
 )
 
 func (s *apiServer) RemoveConversationV1(ctx context.Context, req *conversationApi.RemoveConversationV1Request) (*emptypb.Empty, error) {
-	nameHandler := "RemoveConversationV1"
+	const nameHandler = "RemoveConversationV1"
 
-	tracer := opentracing.GlobalTracer()
-	span := tracer.StartSpan(nameHandler)
+	span, ctx := opentracing.StartSpanFromContext(ctx, nameHandler)
 
 	defer span.Finish()
 
@@ -35,12 +34,8 @@ func (s *apiServer) RemoveConversationV1(ctx context.Context, req *conversationA
 
 	id, err := s.repo.RemoveEntity(req.GetId())
 	if err != nil {
-		log.Error().Msgf("repo: remove conversation: %s", err)
+		log.Error().Err(err).Msg("remove conversation")
 		return nil, status.Error(codes.Internal, "internal error")
-	}
-	if id == 0 {
-		//log.Error().Msgf("repo: remove conversation: %s", err)
-		return nil, status.Error(codes.NotFound, "not found")
 	}
 
 	msg := kafka.Message{

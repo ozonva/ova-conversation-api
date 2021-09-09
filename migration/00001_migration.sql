@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS conversations (
     text text not null,
     date timestamp default now()
 );
+CREATE INDEX IF NOT EXISTS idx_user ON conversations USING hash (user_id);
 
 -- +goose Down
-DROP TABLE conversations;
+DROP INDEX IF EXISTS idx_user;
+DROP TABLE IF EXISTS conversations;

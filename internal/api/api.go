@@ -1,8 +1,6 @@
 package api
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -12,12 +10,6 @@ import (
 	"ova-conversation-api/internal/kafka"
 	"ova-conversation-api/internal/repo"
 	conversationApi "ova-conversation-api/pkg/api/github.com/ozonva/ova-conversation-api/pkg/api"
-)
-
-var (
-	promCreateCntr = promauto.NewCounter(prometheus.CounterOpts{Name: "conversation_created"})
-	promUpdateCntr = promauto.NewCounter(prometheus.CounterOpts{Name: "conversation_updated"})
-	promRemoveCntr = promauto.NewCounter(prometheus.CounterOpts{Name: "conversation_removed"})
 )
 
 type apiServer struct {

@@ -24,12 +24,6 @@ import (
 	conversationApi "ova-conversation-api/pkg/api/github.com/ozonva/ova-conversation-api/pkg/api"
 )
 
-const (
-	addrKafka = "localhost:9092"
-	portGRPC  = ":8082"
-	portProm  = ":9100"
-)
-
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal().Msgf("open file env: %v", err)
@@ -54,15 +48,16 @@ func main() {
 }
 
 func run() {
-	l, err := net.Listen("tcp", portGRPC)
+	grpcPort := os.Getenv("GRPC_PORT")
+	l, err := net.Listen("tcp", grpcPort)
 	if err != nil {
 		log.Fatal().Msgf("listening to TCP: %v", err)
 	}
-	log.Info().Msgf("ova-conversation-api: gRPC server started on the port %s", portGRPC)
+	log.Info().Msgf("ova-conversation-api: gRPC server started on the port %s", grpcPort)
 
 	dbConn := ConnectToDB(dsnForDB())
 
-	kafkaProducer, err := kafka.NewProducer([]string{addrKafka}, "conversations")
+	kafkaProducer, err := kafka.NewProducer([]string{os.Getenv("KAFKA_ADDR")}, "conversations")
 	if err != nil {
 		log.Fatal().Msgf("connecting to kafka: %v", err)
 	}
@@ -104,7 +99,7 @@ func initMetrics() *http.Server {
 	mux.Handle("/metrics", promhttp.Handler())
 
 	metricsServer := &http.Server{
-		Addr:    portProm,
+		Addr:    os.Getenv("PROM_PORT"),
 		Handler: mux,
 	}
 

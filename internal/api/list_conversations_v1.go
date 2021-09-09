@@ -12,10 +12,9 @@ import (
 )
 
 func (s *apiServer) ListConversationsV1(ctx context.Context, req *conversationApi.ListConversationsV1Request) (*conversationApi.ListConversationsV1Response, error) {
-	nameHandler := "ListConversationsV1"
+	const nameHandler = "ListConversationsV1"
 
-	tracer := opentracing.GlobalTracer()
-	span := tracer.StartSpan(nameHandler)
+	span, ctx := opentracing.StartSpanFromContext(ctx, nameHandler)
 
 	defer span.Finish()
 
@@ -33,11 +32,8 @@ func (s *apiServer) ListConversationsV1(ctx context.Context, req *conversationAp
 
 	entities, err := s.repo.ListEntities(req.GetLimit(), req.GetOffset())
 	if err != nil {
-		log.Error().Msgf("repo: list of conversations request: %s", err)
+		log.Error().Err(err).Msg("list of conversations")
 		return nil, status.Error(codes.Internal, "internal error")
-	}
-	if entities == nil || len(entities) == 0 {
-		return nil, status.Error(codes.NotFound, "no data")
 	}
 
 	result := make([]*conversationApi.DescribeConversationV1Response, 0, len(entities))

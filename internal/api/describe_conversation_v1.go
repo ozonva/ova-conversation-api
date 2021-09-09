@@ -12,10 +12,9 @@ import (
 )
 
 func (s *apiServer) DescribeConversationV1(ctx context.Context, req *conversationApi.DescribeConversationV1Request) (*conversationApi.DescribeConversationV1Response, error) {
-	nameHandler := "DescribeConversationV1"
+	const nameHandler = "DescribeConversationV1"
 
-	tracer := opentracing.GlobalTracer()
-	span := tracer.StartSpan(nameHandler)
+	span, ctx := opentracing.StartSpanFromContext(ctx, nameHandler)
 
 	defer span.Finish()
 
@@ -33,7 +32,7 @@ func (s *apiServer) DescribeConversationV1(ctx context.Context, req *conversatio
 
 	entity, err := s.repo.DescribeEntity(req.GetId())
 	if err != nil {
-		log.Error().Msgf("repo: describe conversation: %s", err)
+		log.Error().Err(err).Msg("describe conversation")
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 	if entity == nil {

@@ -21,12 +21,16 @@ const (
 )
 
 func (s *apiServer) MultiCreateConversationsV1(ctx context.Context, req *conversationApi.MultiCreateConversationsV1Request) (*emptypb.Empty, error) {
-	nameHandler := "CreateConversationV1"
+	const nameHandler = "CreateConversationV1"
 
-	tracer := opentracing.GlobalTracer()
-	span := tracer.StartSpan(nameHandler)
+	reqCreate := req.GetCreateConversation()
 
-	defer span.Finish()
+	parentSpan, ctx := opentracing.StartSpanFromContext(ctx, nameHandler)
+	parentSpan.LogFields(
+		openTrLog.Int("Total conversations count", len(reqCreate)),
+		openTrLog.Int("Num conversations in batch", batchSize))
+
+	defer parentSpan.Finish()
 
 	log.Info().Msg(nameHandler)
 	if req == nil {
@@ -40,7 +44,6 @@ func (s *apiServer) MultiCreateConversationsV1(ctx context.Context, req *convers
 		return nil, err
 	}
 
-	reqCreate := req.GetCreateConversation()
 	entities := make([]domain.Conversation, 0, len(reqCreate))
 	for i := range reqCreate {
 		entities = append(entities, domain.Conversation{UserID: reqCreate[i].GetUserId(), Text: reqCreate[i].GetText()})
@@ -53,17 +56,14 @@ func (s *apiServer) MultiCreateConversationsV1(ctx context.Context, req *convers
 	}
 
 	for i := range batches {
-		childSpan := tracer.StartSpan("multi create conversions by batches", opentracing.ChildOf(span.Context()))
-		childSpan.LogFields(openTrLog.Int("size", binary.Size(batches[i])))
-
 		err = s.repo.AddEntities(batches[i])
 		if err != nil {
-			childSpan.Finish()
-
-			log.Error().Msgf("repo: create conversation: %s", err)
+			log.Error().Err(err).Msg("create conversations")
 			return nil, status.Error(codes.Internal, "internal error")
 		}
 
+		childSpan := opentracing.StartSpan("multi create conversions by batches", opentracing.ChildOf(parentSpan.Context()))
+		childSpan.LogFields(openTrLog.Int("size of batch", binary.Size(batches[i])))
 		childSpan.Finish()
 	}
 

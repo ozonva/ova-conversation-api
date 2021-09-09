@@ -66,7 +66,7 @@ func (r *repo) AddEntities(entities []domain.Conversation) error {
 
 func (r *repo) ListEntities(limit uint64, offset uint64) ([]domain.Conversation, error) {
 	query, args, err := squirrel.
-		Select("*").
+		Select("id", "user_id", "text", "date").
 		From("conversations").
 		OrderBy("id").
 		Limit(limit).
@@ -94,11 +94,8 @@ func (r *repo) ListEntities(limit uint64, offset uint64) ([]domain.Conversation,
 	}
 
 	err = rows.Err()
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil {
 		return nil, err
-	}
-	if err == sql.ErrNoRows {
-		return nil, nil
 	}
 
 	return res, nil
@@ -106,7 +103,7 @@ func (r *repo) ListEntities(limit uint64, offset uint64) ([]domain.Conversation,
 
 func (r *repo) DescribeEntity(entityId uint64) (*domain.Conversation, error) {
 	query, args, err := squirrel.
-		Select("*").
+		Select("id", "user_id", "text", "date").
 		From("conversations").
 		Where("id = ?", entityId).
 		PlaceholderFormat(squirrel.Dollar).
@@ -142,17 +139,9 @@ func (r *repo) RemoveEntity(entityId uint64) (uint64, error) {
 		return 0, err
 	}
 
-	res, err := r.db.Exec(query, args...)
+	_, err = r.db.Exec(query, args...)
 	if err != nil {
 		return 0, err
-	}
-
-	ra, err := res.RowsAffected()
-	if err != nil {
-		return 0, err
-	}
-	if ra == 0 {
-		return 0, nil
 	}
 
 	return entityId, nil

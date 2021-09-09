@@ -15,10 +15,9 @@ import (
 )
 
 func (s *apiServer) CreateConversationV1(ctx context.Context, req *conversationApi.CreateConversationV1Request) (*emptypb.Empty, error) {
-	nameHandler := "CreateConversationV1"
+	const nameHandler = "CreateConversationV1"
 
-	tracer := opentracing.GlobalTracer()
-	span := tracer.StartSpan(nameHandler)
+	span, ctx := opentracing.StartSpanFromContext(ctx, nameHandler)
 
 	defer span.Finish()
 
@@ -39,7 +38,7 @@ func (s *apiServer) CreateConversationV1(ctx context.Context, req *conversationA
 		Text:   req.GetText(),
 	})
 	if err != nil {
-		log.Error().Msgf("repo: create conversation: %s", err)
+		log.Error().Err(err).Msg("create conversation")
 		return nil, status.Error(codes.Internal, "internal error")
 	}
 

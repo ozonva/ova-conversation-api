@@ -7,6 +7,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -18,10 +19,12 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ConversationApiClient interface {
-	CreateConversationV1(ctx context.Context, in *CreateConversationV1Request, opts ...grpc.CallOption) (*CreateConversationV1Response, error)
+	CreateConversationV1(ctx context.Context, in *CreateConversationV1Request, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	DescribeConversationV1(ctx context.Context, in *DescribeConversationV1Request, opts ...grpc.CallOption) (*DescribeConversationV1Response, error)
 	ListConversationsV1(ctx context.Context, in *ListConversationsV1Request, opts ...grpc.CallOption) (*ListConversationsV1Response, error)
-	RemoveConversationV1(ctx context.Context, in *RemoveConversationV1Request, opts ...grpc.CallOption) (*RemoveConversationV1Response, error)
+	RemoveConversationV1(ctx context.Context, in *RemoveConversationV1Request, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UpdateConversationV1(ctx context.Context, in *UpdateConversationV1Request, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	MultiCreateConversationsV1(ctx context.Context, in *MultiCreateConversationsV1Request, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type conversationApiClient struct {
@@ -32,8 +35,8 @@ func NewConversationApiClient(cc grpc.ClientConnInterface) ConversationApiClient
 	return &conversationApiClient{cc}
 }
 
-func (c *conversationApiClient) CreateConversationV1(ctx context.Context, in *CreateConversationV1Request, opts ...grpc.CallOption) (*CreateConversationV1Response, error) {
-	out := new(CreateConversationV1Response)
+func (c *conversationApiClient) CreateConversationV1(ctx context.Context, in *CreateConversationV1Request, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/ova.conversation.api.ConversationApi/CreateConversationV1", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -59,9 +62,27 @@ func (c *conversationApiClient) ListConversationsV1(ctx context.Context, in *Lis
 	return out, nil
 }
 
-func (c *conversationApiClient) RemoveConversationV1(ctx context.Context, in *RemoveConversationV1Request, opts ...grpc.CallOption) (*RemoveConversationV1Response, error) {
-	out := new(RemoveConversationV1Response)
+func (c *conversationApiClient) RemoveConversationV1(ctx context.Context, in *RemoveConversationV1Request, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/ova.conversation.api.ConversationApi/RemoveConversationV1", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *conversationApiClient) UpdateConversationV1(ctx context.Context, in *UpdateConversationV1Request, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/ova.conversation.api.ConversationApi/UpdateConversationV1", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *conversationApiClient) MultiCreateConversationsV1(ctx context.Context, in *MultiCreateConversationsV1Request, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/ova.conversation.api.ConversationApi/MultiCreateConversationsV1", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -72,10 +93,12 @@ func (c *conversationApiClient) RemoveConversationV1(ctx context.Context, in *Re
 // All implementations must embed UnimplementedConversationApiServer
 // for forward compatibility
 type ConversationApiServer interface {
-	CreateConversationV1(context.Context, *CreateConversationV1Request) (*CreateConversationV1Response, error)
+	CreateConversationV1(context.Context, *CreateConversationV1Request) (*emptypb.Empty, error)
 	DescribeConversationV1(context.Context, *DescribeConversationV1Request) (*DescribeConversationV1Response, error)
 	ListConversationsV1(context.Context, *ListConversationsV1Request) (*ListConversationsV1Response, error)
-	RemoveConversationV1(context.Context, *RemoveConversationV1Request) (*RemoveConversationV1Response, error)
+	RemoveConversationV1(context.Context, *RemoveConversationV1Request) (*emptypb.Empty, error)
+	UpdateConversationV1(context.Context, *UpdateConversationV1Request) (*emptypb.Empty, error)
+	MultiCreateConversationsV1(context.Context, *MultiCreateConversationsV1Request) (*emptypb.Empty, error)
 	mustEmbedUnimplementedConversationApiServer()
 }
 
@@ -83,7 +106,7 @@ type ConversationApiServer interface {
 type UnimplementedConversationApiServer struct {
 }
 
-func (UnimplementedConversationApiServer) CreateConversationV1(context.Context, *CreateConversationV1Request) (*CreateConversationV1Response, error) {
+func (UnimplementedConversationApiServer) CreateConversationV1(context.Context, *CreateConversationV1Request) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateConversationV1 not implemented")
 }
 func (UnimplementedConversationApiServer) DescribeConversationV1(context.Context, *DescribeConversationV1Request) (*DescribeConversationV1Response, error) {
@@ -92,8 +115,14 @@ func (UnimplementedConversationApiServer) DescribeConversationV1(context.Context
 func (UnimplementedConversationApiServer) ListConversationsV1(context.Context, *ListConversationsV1Request) (*ListConversationsV1Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListConversationsV1 not implemented")
 }
-func (UnimplementedConversationApiServer) RemoveConversationV1(context.Context, *RemoveConversationV1Request) (*RemoveConversationV1Response, error) {
+func (UnimplementedConversationApiServer) RemoveConversationV1(context.Context, *RemoveConversationV1Request) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveConversationV1 not implemented")
+}
+func (UnimplementedConversationApiServer) UpdateConversationV1(context.Context, *UpdateConversationV1Request) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateConversationV1 not implemented")
+}
+func (UnimplementedConversationApiServer) MultiCreateConversationsV1(context.Context, *MultiCreateConversationsV1Request) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MultiCreateConversationsV1 not implemented")
 }
 func (UnimplementedConversationApiServer) mustEmbedUnimplementedConversationApiServer() {}
 
@@ -180,6 +209,42 @@ func _ConversationApi_RemoveConversationV1_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ConversationApi_UpdateConversationV1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateConversationV1Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConversationApiServer).UpdateConversationV1(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ova.conversation.api.ConversationApi/UpdateConversationV1",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConversationApiServer).UpdateConversationV1(ctx, req.(*UpdateConversationV1Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ConversationApi_MultiCreateConversationsV1_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MultiCreateConversationsV1Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ConversationApiServer).MultiCreateConversationsV1(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ova.conversation.api.ConversationApi/MultiCreateConversationsV1",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ConversationApiServer).MultiCreateConversationsV1(ctx, req.(*MultiCreateConversationsV1Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ConversationApi_ServiceDesc is the grpc.ServiceDesc for ConversationApi service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -202,6 +267,14 @@ var ConversationApi_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RemoveConversationV1",
 			Handler:    _ConversationApi_RemoveConversationV1_Handler,
+		},
+		{
+			MethodName: "UpdateConversationV1",
+			Handler:    _ConversationApi_UpdateConversationV1_Handler,
+		},
+		{
+			MethodName: "MultiCreateConversationsV1",
+			Handler:    _ConversationApi_MultiCreateConversationsV1_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

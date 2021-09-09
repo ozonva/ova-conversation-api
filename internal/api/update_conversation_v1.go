@@ -9,12 +9,13 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 
+	"ova-conversation-api/internal/domain"
 	"ova-conversation-api/internal/kafka"
 	conversationApi "ova-conversation-api/pkg/api/github.com/ozonva/ova-conversation-api/pkg/api"
 )
 
-func (s *apiServer) RemoveConversationV1(ctx context.Context, req *conversationApi.RemoveConversationV1Request) (*emptypb.Empty, error) {
-	const nameHandler = "RemoveConversationV1"
+func (s *apiServer) UpdateConversationV1(ctx context.Context, req *conversationApi.UpdateConversationV1Request) (*emptypb.Empty, error) {
+	const nameHandler = "UpdateConversationV1"
 
 	span, ctx := opentracing.StartSpanFromContext(ctx, nameHandler)
 
@@ -22,24 +23,30 @@ func (s *apiServer) RemoveConversationV1(ctx context.Context, req *conversationA
 
 	log.Info().Msg(nameHandler)
 	if req == nil {
-		log.Info().Msg("RemoveConversationV1Request is null")
-		return nil, status.Error(codes.InvalidArgument, "RemoveConversationV1Request is null")
+		log.Info().Msg("UpdateConversationV1Request is null")
+		return nil, status.Error(codes.InvalidArgument, "UpdateConversationV1Request is null")
 	}
 	log.Info().Msgf("request: %s", req.String())
 
-	err := checkValidateError("remove conversation", req.Validate())
+	err := checkValidateError("update conversation", req.Validate())
 	if err != nil {
 		return nil, err
 	}
 
-	id, err := s.repo.RemoveEntity(req.GetId())
+	id, err := s.repo.UpdateEntity(domain.Conversation{
+		ID:   req.GetId(),
+		Text: req.GetText(),
+	})
 	if err != nil {
-		log.Error().Err(err).Msg("remove conversation")
+		log.Error().Err(err).Msg("update conversation")
 		return nil, status.Error(codes.Internal, "internal error")
+	}
+	if id == 0 {
+		return nil, status.Error(codes.NotFound, "not found")
 	}
 
 	msg := kafka.Message{
-		Type: kafka.Remove,
+		Type: kafka.Update,
 		Body: map[string]interface{}{
 			"id": id,
 		},
@@ -50,7 +57,7 @@ func (s *apiServer) RemoveConversationV1(ctx context.Context, req *conversationA
 		return nil, err
 	}
 
-	promRemoveCntr.Inc()
+	promUpdateCntr.Inc()
 
 	return &emptypb.Empty{}, nil
 }
